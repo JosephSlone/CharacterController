@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
@@ -15,10 +16,19 @@ public class PlayerController : MonoBehaviour
     private CharacterController controller;
     private Animator animator;
     private float rotation = 0f;
+    private InputController controls;
+    private Vector2 move;
 
     private float vAxis = 0f;
     private float hAxis = 0f;
 
+    private void Awake()
+    {
+        controls = new InputController();
+
+        controls.GamePlay.Movement.performed += ctx => move = ctx.ReadValue<Vector2>();
+        controls.GamePlay.Movement.canceled += ctx => move = Vector2.zero;       
+    }
 
     private void Start()
     {
@@ -29,17 +39,17 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        //  Because we are not running backwards.
-        vAxis = Mathf.Clamp(Input.GetAxis("Vertical"),-0.5f, 1.0f);
-        hAxis = Input.GetAxis("Horizontal");
+        // Limit backwards movement to -0.5 because
+        // I don't want the character to run backwards.
 
-        Movement();
-        MovementAnimation();
+        vAxis = Mathf.Clamp(move.y,-0.5f, 1.0f);
+        hAxis = move.x; 
     }
 
     private void LateUpdate()
     {
-        
+        Movement();
+        MovementAnimation();
     }
 
     private void Movement()
@@ -103,13 +113,21 @@ public class PlayerController : MonoBehaviour
 
         if (Physics.Raycast(transform.position, direction, out RaycastHit hit, maxDistanceToGround, groundLayerMask))
         {
-            Debug.Log("Is Grounded");
             return true;
         }
         else
         {
-            Debug.Log("Is Not Grounded");
             return false;
         }
+    }
+
+    private void OnEnable()
+    {
+        controls.GamePlay.Enable();
+    }
+
+    private void OnDisable()
+    {
+        controls.GamePlay.Disable();
     }
 }
