@@ -6,9 +6,10 @@ using UnityEngine.InputSystem;
 public class PlayerController : MonoBehaviour
 {
     [SerializeField] private float speed = 4;
+    [SerializeField] private float jumpSpeed = 8.0f;
     [SerializeField] private float rotationSpeed = 80;
-    [SerializeField] private float gravity = 8;
-    [SerializeField] private LayerMask groundLayerMask;
+    [SerializeField] private float gravity = 20;
+    [SerializeField] private LayerMask groundLayerMask = 0;
     [SerializeField] private float maxDistanceToGround = 2f;
 
 
@@ -18,6 +19,7 @@ public class PlayerController : MonoBehaviour
     private float rotation = 0f;
     private InputController controls;
     private Vector2 move;
+    private bool isJumping = false;
 
     private float vAxis = 0f;
     private float hAxis = 0f;
@@ -27,7 +29,9 @@ public class PlayerController : MonoBehaviour
         controls = new InputController();
 
         controls.GamePlay.Movement.performed += ctx => move = ctx.ReadValue<Vector2>();
-        controls.GamePlay.Movement.canceled += ctx => move = Vector2.zero;       
+        controls.GamePlay.Movement.canceled += ctx => move = Vector2.zero;
+
+        controls.GamePlay.Jump.performed += ctx => Jump();
     }
 
     private void Start()
@@ -66,18 +70,37 @@ public class PlayerController : MonoBehaviour
             {
                 moveDir = Vector3.zero;
             }
-        }
 
-        rotation += hAxis * rotationSpeed * Time.deltaTime;
-        transform.eulerAngles = new Vector3(0, rotation, 0);
+            if (isJumping)
+            {
+                moveDir.y = jumpSpeed;
+                isJumping = false;
+            }
+
+            rotation += hAxis * rotationSpeed * Time.deltaTime;
+            transform.eulerAngles = new Vector3(0, rotation, 0);
+        }
 
         moveDir.y -= gravity * Time.deltaTime;
         controller.Move(moveDir * Time.deltaTime);
     }
 
-    private void jump()
+    private void Jump()
     {
+        if(controller.velocity.magnitude > 0.1)
+        {
+            animator.SetTrigger("RunningJump");
+        }
+        else
+        {
+            animator.SetTrigger("StandingJump");
+        }
+    }
 
+    public void JumpEvent()
+    {
+        // Called from the Jump Animation
+        isJumping = true;
     }
 
     private void MovementAnimation()
@@ -111,7 +134,8 @@ public class PlayerController : MonoBehaviour
 
         Debug.DrawRay(transform.position, direction * maxDistanceToGround, Color.green);
 
-        if (Physics.Raycast(transform.position, direction, out RaycastHit hit, maxDistanceToGround, groundLayerMask))
+        if (Physics.Raycast(transform.position, direction, 
+            out RaycastHit hit, maxDistanceToGround, groundLayerMask))
         {
             return true;
         }
