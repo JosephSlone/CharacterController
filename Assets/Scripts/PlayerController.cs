@@ -50,7 +50,7 @@ public class PlayerController : MonoBehaviour
         hAxis = move.x; 
     }
 
-    private void LateUpdate()
+    private void FixedUpdate()
     {
         Movement();
         MovementAnimation();
@@ -80,7 +80,7 @@ public class PlayerController : MonoBehaviour
             rotation += hAxis * rotationSpeed * Time.deltaTime;
             transform.eulerAngles = new Vector3(0, rotation, 0);
         }
-
+        
         moveDir.y -= gravity * Time.deltaTime;
         controller.Move(moveDir * Time.deltaTime);
     }
