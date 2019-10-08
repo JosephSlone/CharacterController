@@ -39,9 +39,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8760115625755848488}
+  - component: {fileID: 2681512506464686855}
   - component: {fileID: 7137384}
   - component: {fileID: 7137386}
-  - component: {fileID: 2681512506464686855}
+  - component: {fileID: 5057438784634554588}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -65,6 +66,25 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!95 &2681512506464686855
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4559203758976788352}
+  m_Enabled: 1
+  m_Avatar: {fileID: 9000000, guid: f446755deb915da43baa2bd9184edf78, type: 3}
+  m_Controller: {fileID: 9100000, guid: a92f5a67efb75b2448c3d0892ed6bbcc, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!143 &7137384
 CharacterController:
   m_ObjectHideFlags: 0
@@ -103,25 +123,20 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 256
   maxDistanceToGround: 0.5
---- !u!95 &2681512506464686855
-Animator:
-  serializedVersion: 3
+  moveDir: {x: 0, y: 0, z: 0}
+  move: {x: 0, y: 0}
+--- !u!114 &5057438784634554588
+MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4559203758976788352}
   m_Enabled: 1
-  m_Avatar: {fileID: 9000000, guid: f446755deb915da43baa2bd9184edf78, type: 3}
-  m_Controller: {fileID: 9100000, guid: a92f5a67efb75b2448c3d0892ed6bbcc, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorControllerStateOnDisable: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1bee580a6b26e14aa7ff53e5dd5519a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &8297737158305174011
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -129,11 +144,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 8760115625755848488}
     m_Modifications:
-    - target: {fileID: 5686533242714783434, guid: ce71794b64e95e24d9da3b977deeec14,
-        type: 3}
-      propertyPath: m_Name
-      value: ybot
-      objectReference: {fileID: 0}
     - target: {fileID: 8696950075389119705, guid: ce71794b64e95e24d9da3b977deeec14,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -188,6 +198,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5686533242714783434, guid: ce71794b64e95e24d9da3b977deeec14,
+        type: 3}
+      propertyPath: m_Name
+      value: ybot
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ce71794b64e95e24d9da3b977deeec14, type: 3}

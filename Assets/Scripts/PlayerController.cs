@@ -1,132 +1,62 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
     [SerializeField] private float speed = 4;
     [SerializeField] private float jumpSpeed = 8.0f;
-    [SerializeField] private float rotationSpeed = 80;
-    [SerializeField] private float gravity = 20;
+    [SerializeField] private float rotationSpeed = 15;
+    [SerializeField] public float gravity = 20;
     [SerializeField] private LayerMask groundLayerMask = 0;
     [SerializeField] private float maxDistanceToGround = 2f;
+    [SerializeField] private Vector3 moveDir = Vector3.zero;
 
-
-    private Vector3 moveDir = Vector3.zero;
     private CharacterController controller;
     private Animator animator;
-    private float rotation = 0f;
-    private InputController controls;
-    private Vector2 move;
-    private bool isJumping = false;
-
-    private float vAxis = 0f;
-    private float hAxis = 0f;
-
-    private void Awake()
-    {
-        controls = new InputController();
-
-        controls.GamePlay.Movement.performed += ctx => move = ctx.ReadValue<Vector2>();
-        controls.GamePlay.Movement.canceled += ctx => move = Vector2.zero;
-
-        controls.GamePlay.Jump.performed += ctx => Jump();
-    }
+    private new Camera camera;
+    private Vector3 movement;
 
     private void Start()
     {
         controller = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
-        animator.SetBool("Moving", true);
+        camera = Camera.main;
     }
 
     private void Update()
     {
-        // Limit backwards movement to -0.5 because
-        // I don't want the character to run backwards.
-
-        vAxis = Mathf.Clamp(move.y,-0.5f, 1.0f);
-        hAxis = move.x; 
-    }
-
-    private void FixedUpdate()
-    {
-        Movement();
-        MovementAnimation();
-    }
-
-    private void Movement()
-    {
         if (controller.isGrounded)
         {
-            if (vAxis != 0)
+            movement = Vector3.zero;
+
+            Vector3 right = camera.transform.right;
+            Vector3 forward = Vector3.Cross(right, Vector3.up);
+
+            movement += right * (Input.GetAxis("Horizontal"));
+            movement += forward * (Input.GetAxis("Vertical"));
+            movement *= speed;
+
+            if (controller.velocity.magnitude > 0)
             {
-                moveDir = new Vector3(0, 0, vAxis);
-                moveDir *= speed;
-                moveDir = transform.TransformDirection(moveDir);
-            }
-            else
-            {
-                moveDir = Vector3.zero;
+                Vector3 velocity = controller.velocity;
+                velocity.y = 0;
+                Quaternion rotation = Quaternion.LookRotation(velocity);
+
+                controller.transform.rotation = Quaternion.Slerp(controller.transform.rotation,
+                    rotation, rotationSpeed * Time.deltaTime);
             }
 
-            if (isJumping)
+            if (Input.GetButton("Jump"))
             {
-                moveDir.y = jumpSpeed;
-                isJumping = false;
+                movement.y = jumpSpeed;
             }
-
-            rotation += hAxis * rotationSpeed * Time.deltaTime;
-            transform.eulerAngles = new Vector3(0, rotation, 0);
         }
         
-        moveDir.y -= gravity * Time.deltaTime;
-        controller.Move(moveDir * Time.deltaTime);
-    }
-
-    private void Jump()
-    {
-        if(controller.velocity.magnitude > 0.1)
-        {
-            animator.SetTrigger("RunningJump");
-        }
-        else
-        {
-            animator.SetTrigger("StandingJump");
-        }
-    }
-
-    public void JumpEvent()
-    {
-        // Called from the Jump Animation
-        isJumping = true;
-    }
-
-    private void MovementAnimation()
-    {
-        if(controller.isGrounded)
-        {
-            animator.SetBool("Falling", false);
-            if (vAxis != 0 || hAxis != 0)
-            {
-                animator.SetBool("Moving", true);
-                animator.SetFloat("Forward", vAxis);
-            }
-            else
-            {
-                animator.SetBool("Moving", false);
-            }
-        }
-        else
-        {
-            if(!IsGrounded())
-            {                
-                animator.SetBool("Moving", false);
-                animator.SetBool("Falling", true);
-            }
-        }
-    }
+        movement.y -= gravity * Time.deltaTime;
+        controller.Move(movement * Time.deltaTime);
+    }  
+     
 
     private bool IsGrounded()
     {
@@ -144,14 +74,5 @@ public class PlayerController : MonoBehaviour
             return false;
         }
     }
-
-    private void OnEnable()
-    {
-        controls.GamePlay.Enable();
-    }
-
-    private void OnDisable()
-    {
-        controls.GamePlay.Disable();
-    }
+     
 }
