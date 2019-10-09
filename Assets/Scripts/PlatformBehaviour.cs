@@ -10,13 +10,17 @@ public class PlatformBehaviour : MonoBehaviour
 
     private Rigidbody rb;
     private Vector3 currentPos;
+    private Transform parent;
 
     CharacterController controller;
+    PlayerController player;
     float gravity;
+
 
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
+        parent = transform;
     }
 
     private void FixedUpdate()
@@ -28,16 +32,17 @@ public class PlatformBehaviour : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.tag == "Player")
+        Debug.Log("Entered Trigger");
+        if(other.tag == "StickyCube")
         {
-            controller = other.GetComponent<CharacterController>();
-            other.transform.parent = transform.parent.transform;
+            other.transform.parent = parent;
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if(other.tag == "Player")
+        Debug.Log("Exited Trigger");
+        if(other.tag == "StickyCube")
         {
             other.transform.parent = null;
         }
@@ -45,9 +50,9 @@ public class PlatformBehaviour : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        if (other.tag == "Player")
+        Debug.Log("Staying in  Trigger");
+        if (other.tag == "StickyCube")
         {
-            Debug.Log(other.transform.localPosition);
         }
     }
 }

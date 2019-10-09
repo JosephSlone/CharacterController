@@ -16,6 +16,7 @@ public class PlayerController : MonoBehaviour
     private Animator animator;
     private new Camera camera;
     private Vector3 movement;
+    private Vector3 worldPosition = Vector3.zero;
 
     private void Start()
     {
@@ -28,7 +29,7 @@ public class PlayerController : MonoBehaviour
     {
         if (controller.isGrounded)
         {
-            movement = Vector3.zero;
+            movement = worldPosition;
 
             Vector3 right = camera.transform.right;
             Vector3 forward = Vector3.Cross(right, Vector3.up);
@@ -57,6 +58,10 @@ public class PlayerController : MonoBehaviour
         controller.Move(movement * Time.deltaTime);
     }  
      
+    public void SetPosition(Vector3 position)
+    {
+        controller.Move(position);
+    }
 
     private bool IsGrounded()
     {
