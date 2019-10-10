@@ -16,6 +16,10 @@ public class PlatformBehaviour : MonoBehaviour
     PlayerController player;
     float gravity;
 
+    public Vector3 rb_velocity;
+    public Vector3 cc_velocity;
+    public Vector3 cc_position;
+
 
     private void Start()
     {
@@ -33,26 +37,37 @@ public class PlatformBehaviour : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         Debug.Log("Entered Trigger");
-        if(other.tag == "StickyCube")
+        if(other.tag == "Player")
         {
             other.transform.parent = parent;
+            controller = other.GetComponent<CharacterController>();
+            other.GetComponent<PlayerController>().OnPlatform = true;
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
         Debug.Log("Exited Trigger");
-        if(other.tag == "StickyCube")
+        if(other.tag == "Player")
         {
+            other.GetComponent<PlayerController>().OnPlatform = false;
             other.transform.parent = null;
+            controller = null;
         }
     }
 
     private void OnTriggerStay(Collider other)
     {
         Debug.Log("Staying in  Trigger");
-        if (other.tag == "StickyCube")
+        if (other.tag == "Player")
         {
+            rb_velocity = rb.velocity;
+            rb_velocity.y = 0;
+            cc_position = controller.transform.position;
+            cc_velocity = controller.velocity.normalized;
+            cc_velocity.y = -1;
+            controller.SimpleMove(rb_velocity);
+            controller.Move(cc_velocity);               
         }
     }
 }

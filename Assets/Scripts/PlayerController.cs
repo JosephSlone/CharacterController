@@ -18,6 +18,12 @@ public class PlayerController : MonoBehaviour
     private Vector3 movement;
     private Vector3 worldPosition = Vector3.zero;
 
+    private bool onPlatform;
+    public bool OnPlatform {
+        get { return onPlatform; }
+        set { onPlatform = value; }
+    }
+
     private void Start()
     {
         controller = GetComponent<CharacterController>();
@@ -55,13 +61,14 @@ public class PlayerController : MonoBehaviour
         }
         
         movement.y -= gravity * Time.deltaTime;
+        if (OnPlatform)
+        {
+            movement /= 100;
+        }
         controller.Move(movement * Time.deltaTime);
     }  
      
-    public void SetPosition(Vector3 position)
-    {
-        controller.Move(position);
-    }
+  
 
     private bool IsGrounded()
     {
