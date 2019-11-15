@@ -1,28 +1,32 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField] private float speed = 4;
-    [SerializeField] private float jumpSpeed = 8.0f;
-    [SerializeField] private float rotationSpeed = 15;
-    [SerializeField] public float gravity = 20;
-    [SerializeField] private LayerMask groundLayerMask = 0;
-    [SerializeField] private float maxDistanceToGround = 2f;
-    [SerializeField] private Vector3 moveDir = Vector3.zero;
+    // For Debugging
+    public float currentSpeed = 0;
 
+    [SerializeField] private float speed = 12;
+    [SerializeField] private float rotationSpeed = 15;
+    [SerializeField] private float gravity = -9.81f;
+    [SerializeField] private float dashMultiplier = 1.5f;
+    [SerializeField] private float jumpStrength = 5f;
+    [SerializeField] private LayerMask groundLayerMask = 0;
+    [SerializeField] private Transform groundCheck;
+    [SerializeField] private float groundDistance;
+    [SerializeField] private LayerMask groundMask;
+    
     private CharacterController controller;
     private Animator animator;
     private new Camera camera;
-    private Vector3 movement;
-    private Vector3 worldPosition = Vector3.zero;
 
-    private bool onPlatform;
-    public bool OnPlatform {
-        get { return onPlatform; }
-        set { onPlatform = value; }
-    }
+    private Vector3 velocity;
+    private bool isGrounded;
+    private Vector3 rotation;
+    private float verticalVelocity = 0;
+    private float boost = 1f;
 
     private void Start()
     {
@@ -33,58 +37,88 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        if (controller.isGrounded)
+        Movement();
+    }
+
+    private void FixedUpdate()
+    {
+        CharacterAnimation();
+    }
+
+    
+
+    private void CharacterAnimation()
+    {
+
+        if (!isGrounded)
         {
-            movement = worldPosition;
 
-            Vector3 right = camera.transform.right;
-            Vector3 forward = Vector3.Cross(right, Vector3.up);
+        }
 
-            movement += right * (Input.GetAxis("Horizontal"));
-            movement += forward * (Input.GetAxis("Vertical"));
-            movement *= speed;
+        if(controller.velocity.magnitude > 0.1)
+        {
+            animator.SetBool("Moving", true);
 
-            if (controller.velocity.magnitude > 0)
+            currentSpeed = controller.velocity.magnitude;
+            float normal = Mathf.InverseLerp(0, 6.8f, currentSpeed);
+            currentSpeed = Mathf.Lerp(0, 1, normal);
+
+            animator.SetFloat("Forward", currentSpeed);
+        }
+        else
+        {
+            animator.SetBool("Moving", false);
+        }
+    }
+
+    private void Movement()
+    {
+        isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+
+        float x = Input.GetAxis("Horizontal");
+        float z = Input.GetAxis("Vertical");
+
+        Vector3 right = camera.transform.right;
+        Vector3 forward = Vector3.Cross(right, Vector3.up);
+        Vector3 move = right * x + forward * z;
+        if (isGrounded)
+        {
+            verticalVelocity = -2f;
+
+            if (Input.GetAxis("Left Trigger") > 0.5f)
             {
-                Vector3 velocity = controller.velocity;
-                velocity.y = 0;
-                Quaternion rotation = Quaternion.LookRotation(velocity);
-
-                controller.transform.rotation = Quaternion.Slerp(controller.transform.rotation,
-                    rotation, rotationSpeed * Time.deltaTime);
+                boost = dashMultiplier;
+            }
+            else
+            {
+                boost = 1;
             }
 
             if (Input.GetButton("Jump"))
             {
-                movement.y = jumpSpeed;
+                verticalVelocity += jumpStrength;
             }
         }
-        
-        movement.y -= gravity * Time.deltaTime;
-        if (OnPlatform)
-        {
-            movement /= 100;
-        }
-        controller.Move(movement * Time.deltaTime);
-    }  
-     
-  
 
-    private bool IsGrounded()
-    {
-        Vector3 direction = Vector3.down;
 
-        Debug.DrawRay(transform.position, direction * maxDistanceToGround, Color.green);
+        verticalVelocity += gravity * Time.deltaTime;
+        move.y = verticalVelocity;
+        controller.Move(move * speed * boost * Time.deltaTime);
 
-        if (Physics.Raycast(transform.position, direction, 
-            out RaycastHit hit, maxDistanceToGround, groundLayerMask))
+        if (controller.velocity.magnitude > 0.5f)
         {
-            return true;
+            Vector3 targetVector = controller.velocity.normalized;
+            
+            targetVector.y = 0;
+            if (targetVector != Vector3.zero)
+            {
+                Quaternion desiredRotation = Quaternion.LookRotation(targetVector);
+                transform.rotation = Quaternion.Lerp(transform.rotation,
+                    desiredRotation, Time.deltaTime * rotationSpeed);
+            }
         }
-        else
-        {
-            return false;
-        }
+
+        Debug.DrawRay(transform.position, transform.forward, Color.black);
+        Debug.DrawRay(transform.position, controller.velocity.normalized, Color.blue);
     }
-     
 }

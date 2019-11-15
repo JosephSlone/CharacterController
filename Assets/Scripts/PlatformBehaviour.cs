@@ -37,23 +37,12 @@ public class PlatformBehaviour : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         Debug.Log("Entered Trigger");
-        if(other.tag == "Player")
-        {
-            other.transform.parent = parent;
-            controller = other.GetComponent<CharacterController>();
-            other.GetComponent<PlayerController>().OnPlatform = true;
-        }
+ 
     }
 
     private void OnTriggerExit(Collider other)
     {
         Debug.Log("Exited Trigger");
-        if(other.tag == "Player")
-        {
-            other.GetComponent<PlayerController>().OnPlatform = false;
-            other.transform.parent = null;
-            controller = null;
-        }
     }
 
     private void OnTriggerStay(Collider other)
